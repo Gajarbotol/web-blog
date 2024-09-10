@@ -4,12 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Login</h1>
-        <a href="/auth/login" class="button">Login with Telegram</a>
-    </div>
+    <h1>Login Page</h1>
+    
+    <!-- Existing login form (if any) -->
+    <form action="/auth/login" method="POST">
+        <input type="text" name="username" placeholder="Username">
+        <input type="password" name="password" placeholder="Password">
+        <button type="submit">Login</button>
+    </form>
+
+    <!-- Telegram login button -->
+    <a href="/login/telegram">
+        <button>Login with Telegram</button>
+    </a>
+    
 </body>
 </html>
