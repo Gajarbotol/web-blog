@@ -15,8 +15,8 @@ app.use(session({
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 
-const TELEGRAM_BOT_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN';
-const DOMAIN = 'https://your-app-name.onrender.com';
+const TELEGRAM_BOT_TOKEN = '6683124880:AAHES0Y-6FviR9oXLpkAHyIB6Pirq4nYQJg';
+const DOMAIN = 'https://web-blog-wofi.onrender.com';
 
 app.get('/login/telegram', (req, res) => {
     const telegramLoginUrl = `https://telegram.me/${TELEGRAM_BOT_TOKEN}?start`;
