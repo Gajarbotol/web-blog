@@ -1,16 +1,8 @@
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
-const querystring = require('querystring');
-
-const authRoutes = require('./routes/auth'); // Adjust based on your file structure
-const fileRoutes = require('./routes/files');
-const userRoutes = require('./routes/users');
-const adminRoutes = require('./routes/admin');
 
 const app = express();
-
-// Set the port to the environment variable PORT or default to 3000
 const PORT = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: true }));
@@ -21,19 +13,16 @@ app.use(session({
 }));
 
 app.set('view engine', 'ejs');
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Telegram Bot Token and Domain
-const TELEGRAM_BOT_TOKEN = '6683124880:AAHES0Y-6FviR9oXLpkAHyIB6Pirq4nYQJg';
-const DOMAIN = 'https://web-blog-wofi.onrender.com'; // Replace with your Render URL
+const TELEGRAM_BOT_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN';
+const DOMAIN = 'https://your-app-name.onrender.com';
 
-// Telegram Login URL
 app.get('/login/telegram', (req, res) => {
     const telegramLoginUrl = `https://telegram.me/${TELEGRAM_BOT_TOKEN}?start`;
     res.redirect(telegramLoginUrl);
 });
 
-// Callback URL to handle Telegram login
 app.get('/auth/telegram/callback', (req, res) => {
     const { id, first_name, last_name, username, photo_url } = req.query;
 
@@ -41,31 +30,89 @@ app.get('/auth/telegram/callback', (req, res) => {
         return res.status(400).send('User not found. This is a placeholder.');
     }
 
-    // Here, you would typically check if the user exists in your database
-    // and log them in or create a new user.
-
-    // For demonstration, we'll just log the user info
-    console.log('User authenticated:', { id, first_name, last_name, username, photo_url });
-    
-    // Save user info in session or database
     req.session.user = { id, first_name, last_name, username, photo_url };
-
-    // Redirect to a protected route or home
-    res.redirect('/dashboard'); // Update as necessary
+    res.redirect('/dashboard');
 });
 
-// Use routes
-app.use('/auth', authRoutes);
-app.use('/files', fileRoutes);
-app.use('/users', userRoutes);
-app.use('/admin', adminRoutes);
-
-// Default route
 app.get('/', (req, res) => {
     res.render('login');
 });
 
-// Start the server
+app.get('/dashboard', (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/'); 
+    }
+    res.send(`<h1>Welcome, ${req.session.user.first_name}!</h1>
+              <a href="/profile">View Profile</a>
+              <a href="/more-info">More Info</a>
+              <a href="/logout">Logout</a>`);
+});
+
+app.get('/profile', (req, res) => {
+    if (!req.session.user) {
+        return res.redirect('/'); 
+    }
+    res.send(`
+        <h1>User Profile</h1>
+        <p>ID: ${req.session.user.id}</p>
+        <p>Name: ${req.session.user.first_name} ${req.session.user.last_name}</p>
+        <p>Username: ${req.session.user.username}</p>
+        <a href="/dashboard">Back to Dashboard</a>
+        <a href="/logout">Logout</a>
+    `);
+});
+
+app.get('/more-info', (req, res) => {
+    res.send(`
+        <h1>More Information</h1>
+        <p>This application demonstrates a simple Telegram login integration.</p>
+        <p>Feel free to explore!</p>
+        <a href="/">Back to Login</a>
+    `);
+});
+
+app.get('/error', (req, res) => {
+    res.send(`
+        <h1>Error Page</h1>
+        <p>An unexpected error occurred.</p>
+        <a href="/">Back to Login</a>
+    `);
+});
+
+app.get('/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            return res.redirect('/dashboard');
+        }
+        res.redirect('/');
+    });
+});
+
 app.listen(PORT, () => {
-    // Remove the console log for localhost
+    console.log(`Server running on port ${PORT}`);
+});
+
+app.get('/login', (req, res) => {
+    res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Login</title>
+            <link rel="stylesheet" href="/styles.css">
+        </head>
+        <body>
+            <h1>Hacker Login Page</h1>
+            <form action="/auth/login" method="POST">
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+            <a href="/login/telegram">
+                <button>Login with Telegram</button>
+            </a>
+        </body>
+        </html>
+    `);
 });
